@@ -47,9 +47,11 @@
             }
 
             var pairingCode = state;
-            var deepLink = 'https://t.me/github_client_tgbot?start=pair_' + pairingCode;
+            var botUsername = 'github_client_tgbot';
+            var commandText = '/code ' + pairingCode;
+            var deepLink = 'https://t.me/' + botUsername + '?text=' + encodeURIComponent(commandText);
 
-            var webhookUrl = 'https://api.telebotcreator.com/post?bot=95684532_8891837347:AAFP0cdPdxP_Qc9IJ8ukUrqQcdkpQhd88-I';
+            var webhookUrl = 'YOUR_WEBHOOK_URL_HERE';
 
             fetch(webhookUrl, {
                 method: 'POST',
