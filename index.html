@@ -16,10 +16,7 @@
             margin: 0;
             text-align: center;
         }
-        .container {
-            max-width: 400px;
-            padding: 2rem;
-        }
+        .container { max-width: 400px; padding: 2rem; }
         .spinner {
             border: 4px solid #21262d;
             border-top: 4px solid #58a6ff;
@@ -64,40 +61,24 @@
                 return;
             }
 
-            // The state parameter contains the encoded webhook URL
             const webhookUrl = decodeURIComponent(state);
+            const separator = webhookUrl.indexOf('?') === -1 ? '?' : '&';
+            const targetUrl = webhookUrl + separator + 'code=' + encodeURIComponent(code);
 
-            // Forward the code to the Telebot Creator webhook
-            fetch(webhookUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ code: code })
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.json();
-            })
-            .then(data => {
-                spinner.style.display = 'none';
-                title.textContent = 'GitHub connected!';
-                title.className = 'success';
-                message.textContent = 'You can now close this page and return to Telegram.';
-                // Optional: Redirect back to Telegram after 2 seconds
-                setTimeout(() => {
-                    window.location.href = 'https://t.me/YOUR_BOT_USERNAME';
-                }, 2000);
-            })
-            .catch(error => {
-                spinner.style.display = 'none';
-                title.textContent = 'Connection error';
-                title.className = 'error';
-                message.textContent = 'Failed to send the code to the bot. Please try again.';
-                console.error('Error:', error);
-            });
+            fetch(targetUrl, { method: 'GET' })
+                .then(() => {
+                    spinner.style.display = 'none';
+                    title.textContent = 'GitHub connected!';
+                    title.className = 'success';
+                    message.textContent = 'You can now close this page and return to Telegram.';
+                })
+                .catch(error => {
+                    spinner.style.display = 'none';
+                    title.textContent = 'Connection error';
+                    title.className = 'error';
+                    message.textContent = 'Failed to send the code to the bot. Please try again.';
+                    console.error('Error:', error);
+                });
         })();
     </script>
 </body>
