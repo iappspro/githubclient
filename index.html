@@ -38,33 +38,28 @@
             background: #161b22;
             border: 1px solid #30363d;
             border-radius: 8px;
-            padding: 1.2rem;
-            margin: 1.25rem 0;
-            font-size: 1.6rem;
+            padding: 1rem;
+            margin: 1rem 0;
+            font-size: 1.4rem;
             font-weight: 700;
-            letter-spacing: 0.2em;
+            letter-spacing: 0.15em;
             color: #58a6ff;
             font-family: monospace;
             user-select: all;
-            cursor: pointer;
         }
-        .command {
-            background: #161b22;
-            border: 1px dashed #30363d;
-            border-radius: 6px;
-            padding: 0.7rem;
-            font-family: monospace;
+        .btn {
+            display: inline-block;
+            background: #238636;
+            color: #fff;
+            text-decoration: none;
+            padding: 0.7rem 1.4rem;
+            border-radius: 8px;
+            font-weight: 600;
             font-size: 0.95rem;
-            color: #7ee787;
-            user-select: all;
-            cursor: pointer;
             margin-top: 0.5rem;
         }
-        .hint { font-size: 0.8rem; color: #484f58; margin-top: 1rem; }
-        .copied {
-            color: #3fb950 !important;
-            border-color: #3fb950 !important;
-        }
+        .btn:hover { background: #2ea043; }
+        .hint { font-size: 0.8rem; color: #484f58; margin-top: 0.75rem; }
     </style>
 </head>
 <body>
@@ -73,21 +68,13 @@
         <h1 id="title">Connecting your GitHub account...</h1>
         <p id="message">Please wait while we process your authorization.</p>
         <div id="result" style="display:none;">
-            <p>Send this command to the bot to finish connecting:</p>
-            <div class="command" id="command" onclick="copyCommand(this)">/code <span id="codeText"></span></div>
-            <p class="hint">Tap the command to copy it.</p>
+            <div class="code-box" id="pairingCode"></div>
+            <a class="btn" id="deepLink" href="#">Open Telegram Bot</a>
+            <p class="hint">Or send <b>/start <span id="codeText"></span></b> to the bot manually.</p>
         </div>
     </div>
 
     <script>
-        function copyCommand(el) {
-            var text = el.innerText;
-            navigator.clipboard.writeText(text).then(function () {
-                el.classList.add('copied');
-                setTimeout(function () { el.classList.remove('copied'); }, 1200);
-            });
-        }
-
         (function () {
             var params = new URLSearchParams(window.location.search);
             var code = params.get('code');
@@ -108,12 +95,14 @@
 
             var webhookUrl = decodeURIComponent(state);
 
-            var chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+            // Generate a short, base64url-safe pairing code
+            var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
             var pairingCode = '';
-            for (var i = 0; i < 6; i++) {
+            for (var i = 0; i < 8; i++) {
                 pairingCode += chars.charAt(Math.floor(Math.random() * chars.length));
             }
 
+            // Send both the pairing code and the OAuth code to TBC
             fetch(webhookUrl, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -123,9 +112,11 @@
                 spinner.style.display = 'none';
                 title.textContent = 'Almost there!';
                 title.className = 'success';
-                message.textContent = 'Authorization successful.';
-                document.getElementById('codeText').textContent = pairingCode;
+                message.textContent = 'Tap the button below to finish linking your account:';
                 result.style.display = 'block';
+                document.getElementById('pairingCode').textContent = pairingCode;
+                document.getElementById('codeText').textContent = pairingCode;
+                document.getElementById('deepLink').href = 'https://t.me/github_client_tgbot?start=pairing_' + pairingCode;
             })
             .catch(function (error) {
                 spinner.style.display = 'none';
